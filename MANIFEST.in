@@ -1,0 +1,16 @@
+# Files to include in the source distribution
+include README.md
+include LICENSE
+
+# Files to exclude from the source distribution
+global-exclude __pycache__/*
+global-exclude *.so
+global-exclude *.pyd
+global-exclude *.pyc
+global-exclude .git*
+global-exclude .deps/*
+global-exclude .DS_Store
+
+# Exclude all files under dir
+#prune dir
+
