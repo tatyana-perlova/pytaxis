@@ -4,7 +4,7 @@ Pytaxis is a Python package for analysis of movies of swimming bacteria. [**Read
 ### Library structure
 Py-taxis consists of three modules:
 * [**image**](/py-taxis/image.py) - image processing module, uses [**OpenCV**](https://opencv.org/) to detect bacteria in each frame of the movie and [**trackpy**](https://github.com/soft-matter/trackpy) to connect coordinates into trajectories.
-* [**proc**](/py-taxis/proc.py) - trajectory analysis module, allows to calculate instantaneous parameters of the trajectories, filter spurious trajectories and detect distinct motility states, e.g. runs and tumbles.
+* [**proc**](/py-taxis/proc.py) - trajectory analysis module, allows to calculate instantaneous parameters of the trajectories, filter spurious trajectories and detect distinct motility states (e.g. runs and tumbles) using Hidden Markov model implemented in [**hmmlearn**](https://github.com/hmmlearn/hmmlearn). 
 * [**plot**](/py-taxis/plot.py) - contains various handy plotting functions.
 
 
