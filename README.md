@@ -10,8 +10,12 @@ Py-taxis consists of three modules:
 
 ### Data analysis workflow
 The workflow below illustrates different stages of data analysis from detecting bacteria to assigning motility states.
+
+
 ![Alt text](/examples/analysis_workflow.png?raw=true "Title")
 
 ### Example of the detected trajectories
+
+Trajectory in blue belongs to simming bacteria, while trajectory in red - to the bacteria stuck to the glass surface. Such circular trajectories are removed at the filtering stage of data analsys in order to minimize noise due to errouneous assignment of motility states.
 
  ![**this video**](/examples/detected_trajectories.gif) 
