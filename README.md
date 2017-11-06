@@ -7,3 +7,5 @@ It consists of three modules:
 
 [**Read the tutorial**](/examples/Full_walkthrough.ipynb) for details on how to use it.
 If you use py-taxis for published research, please cite [**this paper**](https://www.biorxiv.org/content/early/2017/10/30/211474) to credit the contributors.
+
+[Alt text](/examples/analysis_workflow.png?raw=true "Title")
