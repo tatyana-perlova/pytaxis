@@ -1,5 +1,5 @@
-## Py-taxis
-Py-taxis is a Python package for analysis of movies of swimming bacteria. [**Read the tutorial**](/examples/Full_walkthrough.ipynb) for details on how to use the library. If you use py-taxis for published research, please cite [**this paper**](https://www.biorxiv.org/content/early/2017/10/30/211474) to credit the authors. 
+## Pytaxis
+Pytaxis is a Python package for analysis of movies of swimming bacteria. [**Read the tutorial**](/examples/Full_walkthrough.ipynb) for details on how to use the package. If you use pytaxis for published research, please cite [**this paper**](https://www.biorxiv.org/content/early/2017/10/30/211474) to credit the authors. 
 
 ### Library structure
 Py-taxis consists of three modules:
@@ -12,10 +12,11 @@ Py-taxis consists of three modules:
 The workflow below illustrates different stages of data analysis from detecting bacteria to assigning motility states.
 
 
+
 ![Alt text](/examples/analysis_workflow.png?raw=true "Title")
 
 ### Example of the detected trajectories
 
-Trajectory in blue belongs to simming bacteria, while trajectory in red - to the bacteria stuck to the glass surface. Such circular trajectories are removed at the filtering stage of data analsys in order to minimize noise due to errouneous assignment of motility states.
+Trajectory in blue belongs to a swimming bacterium, while trajectory in red - to a bacterium stuck to the glass surface. Such circular trajectories are removed at the filtering stage of data analsys in order to minimize noise due to erroneous assignment of motility states.
 
  ![**this video**](/examples/detected_trajectories.gif) 
