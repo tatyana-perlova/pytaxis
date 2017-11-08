@@ -7,7 +7,14 @@ import scipy
 from matplotlib.patches import Ellipse
 
 #!==============Define functions================
-def traj_len_dist(traj, bw, cutoffs):
+def traj_len_dist(traj, 
+                  bw, 
+                  cutoffs):
+    '''
+    Takes:
+    Returns:
+    '''
+    
     traj_lengths = traj.groupby('particle').count()
     bins = np.arange( traj_lengths.frame.min(), traj_lengths.frame.max(), bw)
     fig = plt.figure(figsize=(4,3.5))
@@ -42,7 +49,15 @@ def traj_len_dist(traj, bw, cutoffs):
         transform=ax.transAxes, fontsize = 14)
     
 #!==============KDE================
-def plot_KDE(Z, extent, N_traj, vmax = None, tick_step = 1000):
+def plot_KDE(Z, 
+             extent, 
+             N_traj, 
+             vmax = None, 
+             tick_step = 1000):
+    '''
+    Takes:
+    Returns:
+    '''
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(1, 1, 1)
 
@@ -62,15 +77,30 @@ def plot_KDE(Z, extent, N_traj, vmax = None, tick_step = 1000):
     return cset
     
 #!==============Ellipses================
-def plot_ellipses(ax, (Rx, Ry), (x0, y0), N_Rs, colors):
+def plot_ellipses(ax, 
+                  (Rx, Ry), 
+                  (x0, y0), 
+                  N_Rs, 
+                  colors):
+    '''
+    Takes:
+    Returns:
+    '''
     for i in range(len(N_Rs)):
         ellipse = Ellipse((x0, y0), N_Rs[i]*Rx*2, N_Rs[i]*Ry*2, edgecolor=colors[i], lw=5,
                              fc = 'None', label = '{} R'.format(N_Rs[i]))
         ax.add_patch(ellipse)
         
 #!==============trajectories================
-def plot_traj_all(traj, imdim, pix_size, palette = None, scalebar = 100):
-    
+def plot_traj_all(traj,
+                  imdim, 
+                  pix_size, 
+                  palette = None, 
+                  scalebar = 100):
+    '''
+    Takes:
+    Returns:
+    '''
     if palette == None:
         palette = seaborn.color_palette("Dark2", len(traj.particle.unique()))
     plt.tick_params(\
@@ -94,8 +124,14 @@ def plot_traj_all(traj, imdim, pix_size, palette = None, scalebar = 100):
     plt.text(1550, 1850, r'{}$\mu m$'.format(scalebar), fontsize = 18)
 #!==============distributions================
 
-def dist_by_state(traj, state, params, palette):
-    
+def dist_by_state(traj, 
+                  state, 
+                  params, 
+                  palette):
+    '''
+    Takes:
+    Returns:
+    '''
     plt.figure(figsize = (4*len(params), 3)) 
     for i in range(len(params)):
         bins = np.arange(traj[params[i]].min(), 
@@ -114,11 +150,23 @@ def dist_by_state(traj, state, params, palette):
         plt.xlim(min(bins), max(bins))
         plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
 
-    plt.legend(loc = 1, bbox_to_anchor=(1.4, 1.0))
+    plt.legend(loc = 1, bbox_to_anchor=(1.5, 1.0))
 
 
 #!=================plot trace===================
-def plot_trace(ax, wind, shift, data, fps, color, label = None, line_style = '-', tbias = False):
+def plot_trace(ax, 
+               wind, 
+               shift, 
+               data, 
+               fps, 
+               color, 
+               label = None, 
+               line_style = '-', 
+               tbias = False):
+    '''
+    Takes:
+    Returns:
+    '''
     aggregations = {'mean': ['mean', 'count'], 'std': lambda x: np.nansum(x**2), 'count':  ['sum', 'mean']}
     data.columns = ['frame', 'mean', 'std', 'count']
     param_stats = data.groupby(['frame'], as_index = False)['mean', 'std', 'count'].agg(aggregations)
@@ -139,9 +187,19 @@ def plot_trace(ax, wind, shift, data, fps, color, label = None, line_style = '-'
 
 #!=================plot rolling mean ===================
 
-def plot_rolling_mean(ax, param_stats, wind, shift, fps, label, color, line_style, 
+def plot_rolling_mean(ax, 
+                      param_stats,
+                      wind, shift, 
+                      fps, 
+                      label, 
+                      color, 
+                      line_style, 
                       param_names,
                       ):
+    '''
+    Takes:
+    Returns:
+    '''
     frame, param, sem = param_names
     rolling_mean = param_stats.rolling(window = wind, center=True).mean()[::shift]
     ax.plot(rolling_mean[frame]/fps,
@@ -159,9 +217,19 @@ def plot_rolling_mean(ax, param_stats, wind, shift, fps, label, color, line_styl
     
 #!=================plot time traces of the trajectory parameters ===================
 
-def plot_params(traj, particle, pix_size, fps, size = 5, params = ['vel', 'acc', 'angle', 'vel_angle', 'acc_angle'],
-              colorbystate = False, state = 'tbias_alon', palette = None, alpha = 0.5):
-    
+def plot_params(traj, 
+                particle, 
+                pix_size, 
+                fps, size = 5, 
+                params = ['vel', 'acc', 'angle', 'vel_angle', 'acc_angle'],
+                colorbystate = False, 
+                state = 'tbias_alon', 
+                palette = None, 
+                alpha = 0.5):
+    '''
+    Takes:
+    Returns:
+    '''
     traj_single = traj[traj.particle == particle]
     colors = np.array(seaborn.color_palette("RdBu_r", len(traj_single)))
     if palette == None:
@@ -193,7 +261,19 @@ def plot_params(traj, particle, pix_size, fps, size = 5, params = ['vel', 'acc',
     
 #!=================plot individual bacterial trajectories ===================
 
-def plot_traj(traj, particles, pix_size, size = 5, colorbystate = False, state = 'tbias_alon', palette = None, sizes = None, alpha = 0.5):
+def plot_traj(traj, 
+              particles, 
+              pix_size, 
+              size = 5, 
+              colorbystate = False, 
+              state = 'tbias_alon', 
+              palette = None, 
+              sizes = None, 
+              alpha = 0.5):
+    '''
+    Takes:
+    Returns:
+    '''
     if palette == None:
         palette = seaborn.color_palette('Dark2', len(traj_single[state].unique()))
     if sizes == None:

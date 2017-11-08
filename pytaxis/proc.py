@@ -116,7 +116,7 @@ def fit_model(traj,
     Takes:
     traj - dataframe, containing bacterial trajectories and their parameters
     
-    params - variable used to infer hidden states
+    params - names of the columns in the traj, variable used to infer hidden states
     n_components - number of states
     covariance_type - defines whether variables are independent or not, 
                 diagonal covariance implies independent variables
@@ -142,12 +142,15 @@ def fit_model(traj,
     traj.loc[:, 'state_' + model_type] = state
     return model
 #!=====================================================================================
-def calc_stat(dataset, params, funcs, col_names):
+def calc_stat(dataset, 
+              params, 
+              funcs, 
+              col_names):
     '''
-    Calculates statistics for every trajectory and adds corresponding columns to the dataframe
+    Calculates statistics for every trajectory and adds corresponding columns to the dataframe. 
     Takes:
     dataset - dataframe with trajectories
-    params - parameters for which statistics is calculated
+    params - names of the columns in the dataset, parameters for which statistics is calculated
     funcs - functions used to calculate statistics
     col_names - appendices to the new column names
     Returns:
@@ -169,10 +172,17 @@ def calc_stat(dataset, params, funcs, col_names):
     dataset = pd.merge(dataset, dataset_stats, on = ['particle'])
     return dataset
 #!=====================================================================================
-def calc_run_stat(traj, param, state):
+def calc_run_stat(traj, 
+                  param, 
+                  state):
     '''
+    Calculate mean parameters over the frames corresponding to runnint state
     Takes:
+    traj - dataframe with trajectories
+    param - names of the columns in the traj, parameters for which statistics is calculated
+    state - name of the column in the traj,  that is used to define 'run' state
     Returns:
+    traj - dataframe with calculated statistics
     '''
     traj.loc[:, param + '_run'] = traj.loc[:, param]
     traj.loc[traj[state] == 0, param + '_run'] = None
@@ -182,9 +192,18 @@ def calc_run_stat(traj, param, state):
     traj = calc_stat(traj, [param + '_run'], [np.nanmean], ['mean'])
     return traj
 #!=====================================================================================
-def calc_params(traj, wind, fps, pix_size):
+def calc_params(traj, 
+                wind, 
+                fps, 
+                pix_size):
     '''
+    Calculates instantaneous parameters of the trajectories, velocity, angle between consecutive velocity vectors, 
+    acceleration, angular acceleration and angular velocity
     Takes:
+    traj - dataframe with trajectories
+    wind - number of rames in a window used for calculating parameters
+    fps - video framerate, number of rames per second
+    pix_size - size of the pixel in microns
     Returns:
     '''
     left_edge, right_edge, idx_edge, _, _ = find_edges(traj, wind)
@@ -200,10 +219,24 @@ def calc_params(traj, wind, fps, pix_size):
     traj.loc[:, 'acc_angle'] = calc_diff(traj, 'vel_angle', wind, left_edge, right_edge, idx_edge)*fps
     
 #!=====================================================================================
-def calc_diff(traj, param, wind, left_edge, right_edge, idx_edge, dividebywind = False):
+def calc_diff(traj, 
+              param, 
+              wind, 
+              left_edge, 
+              right_edge, 
+              idx_edge, 
+              dividebywind = False):
     '''
+    Calculates change in parameter in a window
     Takes:
+    traj - dataframe with trajectories
+    param - name of the column in a dataframe, parameter for which the change is calculated
+    wind - number of rames in a window used for calculating parameters
+    left_edge - number of frames on the left that will be empty
+    right_edge -  of frames on the right that will be empty
+    idx_edge - frames marking the end of the trajectories
     Returns:
+    diff - array of calculated values with the same length as the dataframe provided
     '''
     diff = (traj[param].values[wind:] - traj[param].values[:-wind])
     if dividebywind == True:
@@ -214,7 +247,8 @@ def calc_diff(traj, param, wind, left_edge, right_edge, idx_edge, dividebywind =
     diff[idx_edge] = np.nan
     return diff
 #!=====================================================================================
-def find_edges(traj, wind):
+def find_edges(traj, 
+               wind):
     '''
     Takes:
     Returns:
@@ -258,7 +292,9 @@ def find_MADs_KDE(x, y):
     return (x0, y0), (MADx, MADy), (Z, extent)
 
 #!=====================================================================================
-def find_center(ax, X, min_bin_freq = 100):
+def find_center(ax, 
+                X, 
+                min_bin_freq = 100):
     '''
     Takes:
     Returns:
@@ -286,7 +322,11 @@ def find_center(ax, X, min_bin_freq = 100):
     return cluster_centers, labels
 
 #!=====================================================================================
-def find_MADs_MeanShift(ax, param1, param2, data, min_bin_freq):
+def find_MADs_MeanShift(ax, 
+                        param1, 
+                        param2, 
+                        data, 
+                        min_bin_freq):
     '''
     Takes:
     Returns:
@@ -304,7 +344,11 @@ def find_MADs_MeanShift(ax, param1, param2, data, min_bin_freq):
 
 
 #!=====================================================================================
-def plot_MADs((MADx, MADy), (x0, y0), N_MADs, colors, lines):
+def plot_MADs((MADx, MADy), 
+              (x0, y0), 
+              N_MADs, 
+              colors, 
+              lines):
     '''
     Takes:
     Returns:
@@ -315,7 +359,10 @@ def plot_MADs((MADx, MADy), (x0, y0), N_MADs, colors, lines):
         ax.add_patch(ellipse)
 
 #!=====================================================================================
-def assign_dist(dataset_stats, params, center, R):
+def assign_dist(dataset_stats, 
+                params, 
+                center, 
+                R):
     '''
     Takes:
     Returns:
