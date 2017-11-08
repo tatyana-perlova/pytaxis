@@ -7,7 +7,6 @@ import scipy
 from matplotlib.patches import Ellipse
 
 #!==============Define functions================
-
 def traj_len_dist(traj, bw, cutoffs):
     traj_lengths = traj.groupby('particle').count()
     bins = np.arange( traj_lengths.frame.min(), traj_lengths.frame.max(), bw)
@@ -103,7 +102,7 @@ def dist_by_state(traj, state, params, palette):
                         traj[params[i]].max(), 
                         (traj[params[i]].max() - traj[params[i]].min())/20)
         plt.subplot(1, len(params), i + 1)
-        for state_un in traj[state].unique():
+        for state_un in np.sort(traj[state].unique()):
             _ = plt.hist(traj[traj[state] == state_un][params[i]].values, 
                             bins = bins, 
                             facecolor = palette[state_un], 

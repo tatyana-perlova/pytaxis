@@ -13,12 +13,32 @@ from sklearn.cluster import MeanShift, estimate_bandwidth
 
 #!==============Define functions================
 #!=====================================================================================
-def find_tumbles(traj,  model, params = ['vel_norm', 'acc_norm', 'acc_angle'], 
-                    n_components = 3, threshold = 1,
-                    covariance_type = 'diag',
-                    n_iter = 1000,
-                    model_type = 'HMM',
-                    int_state = 1):
+def find_tumbles(traj,  
+                 model, 
+                 params = ['vel_norm', 'acc_norm', 'acc_angle'], 
+                n_components = 3, threshold = 1,
+                covariance_type = 'diag',
+                n_iter = 1000,
+                model_type = 'HMM',
+                int_state = 1):
+    '''
+    Finds distinct motility states in bacterial trajectories.
+    Takes:
+    traj - dataframe, containing bacterial trajectories and their parameters
+    model - Gaussian Mixture or Hidden Markov Model trained on a reference dataset, 
+            if no model is provided, current dataset is used for training
+    params - variable used to infer hidden states
+    n_components - number of states
+    threshold - percent difference between running velocity calculated from run states, 
+                used to indicate convergence of state assignment
+    covariance_type - defines whether variables are independent or not, 
+                diagonal covariance implies independent variables
+    int_state - if '1', intermediate state is assigned to runs, if '0' to tumbles,
+                only matters if there are more than 2 components.
+    Returns:
+    model
+    traj - dataframe with assigned states
+    '''
     i = 0
     run_state = 1
     plt.figure(figsize=(6,5))
@@ -56,7 +76,24 @@ def find_tumbles(traj,  model, params = ['vel_norm', 'acc_norm', 'acc_angle'],
     plt.xlim(0, i + 1)
     return model, traj
 #!=====================================================================================
-def assign_tumbles(traj, vel_type, state_type, tbias_type, int_state):
+def assign_tumbles(traj, 
+                   vel_type, 
+                   state_type, 
+                   tbias_type, 
+                   int_state):
+    '''
+    Assign run and tumble states after sequence of hidded states have been established
+    Takes:
+    traj - dataframe with bacterial trajectories
+    vel_type - type of velocity used to establish which state is a run and which is a tumble
+    state_type - name of the state, e.g. 'tbias_HMM'
+    int_state - if '1', intermediate state is assigned to runs, if '0' to tumbles,
+                only matters if there are more than 2 components.
+    Returns:
+    run_state - number of a hidden state, corresponding to a run
+    tumble_state - number of a hidden state, corresponding to a tumble
+    vel_mean - average velocity for different states
+    '''
     vel_mean = np.zeros(len(traj[state_type].unique()))
     for state in traj[state_type].unique():
         vel_mean[state] = traj.loc[traj[state_type] == state, vel_type].mean()
@@ -67,11 +104,28 @@ def assign_tumbles(traj, vel_type, state_type, tbias_type, int_state):
     traj.loc[traj[state_type] == run_state, tbias_type] = 1
     return run_state, tumble_state, vel_mean
 #!=====================================================================================
-def fit_model(traj, params, n_components, 
+def fit_model(traj, 
+              params, 
+              n_components, 
               covariance_type,
               n_iter, 
               model_type,
               model):
+    '''
+    Estimates model parameters based on the data. Predict states given model parameters and data
+    Takes:
+    traj - dataframe, containing bacterial trajectories and their parameters
+    
+    params - variable used to infer hidden states
+    n_components - number of states
+    covariance_type - defines whether variables are independent or not, 
+                diagonal covariance implies independent variables
+    n_iter - maximum number of iterations
+    mode_type - 'GMM' (Gaussian mixture), 'HMM' (Hidden Markov Model) or 'GMM_Dirichlet' (Gaussian mixture with Dirichlet emieeions)
+    model - Gaussian Mixture or Hidden Markov Model trained on a reference dataset, 
+            if no model is provided, current dataset is used for training
+    Returns:
+    '''
     X = np.stack((traj[param] for param in params), -1)
     lengths = traj[['particle', 'frame']].groupby([u'particle'], as_index = False).count().frame.values
     
@@ -89,6 +143,16 @@ def fit_model(traj, params, n_components,
     return model
 #!=====================================================================================
 def calc_stat(dataset, params, funcs, col_names):
+    '''
+    Calculates statistics for every trajectory and adds corresponding columns to the dataframe
+    Takes:
+    dataset - dataframe with trajectories
+    params - parameters for which statistics is calculated
+    funcs - functions used to calculate statistics
+    col_names - appendices to the new column names
+    Returns:
+    dataset with calculated statistics
+    '''
     keys = [u'particle'] + params
     grouped = dataset[keys].groupby([u'particle'], as_index = False)
     dataset_stats = grouped.agg(funcs)
@@ -106,6 +170,10 @@ def calc_stat(dataset, params, funcs, col_names):
     return dataset
 #!=====================================================================================
 def calc_run_stat(traj, param, state):
+    '''
+    Takes:
+    Returns:
+    '''
     traj.loc[:, param + '_run'] = traj.loc[:, param]
     traj.loc[traj[state] == 0, param + '_run'] = None
     if param + '_run_mean' in traj.keys():
@@ -115,8 +183,11 @@ def calc_run_stat(traj, param, state):
     return traj
 #!=====================================================================================
 def calc_params(traj, wind, fps, pix_size):
+    '''
+    Takes:
+    Returns:
+    '''
     left_edge, right_edge, idx_edge, _, _ = find_edges(traj, wind)
-    
     vel_x = calc_diff(traj, 'x', wind, left_edge, right_edge, idx_edge)*fps*pix_size
     vel_y = calc_diff(traj, 'y', wind, left_edge, right_edge, idx_edge)*fps*pix_size
     traj.loc[:, 'vel'] = (vel_x**2 + vel_y**2)**0.5
@@ -130,7 +201,10 @@ def calc_params(traj, wind, fps, pix_size):
     
 #!=====================================================================================
 def calc_diff(traj, param, wind, left_edge, right_edge, idx_edge, dividebywind = False):
-    
+    '''
+    Takes:
+    Returns:
+    '''
     diff = (traj[param].values[wind:] - traj[param].values[:-wind])
     if dividebywind == True:
         diff = diff/wind
@@ -141,6 +215,10 @@ def calc_diff(traj, param, wind, left_edge, right_edge, idx_edge, dividebywind =
     return diff
 #!=====================================================================================
 def find_edges(traj, wind):
+    '''
+    Takes:
+    Returns:
+    '''
     traj.reset_index(drop = True, inplace = True)
     traj.loc[:, 'index'] = traj.index
     idx_start = traj.groupby('particle').agg('first')['index'].values
@@ -155,7 +233,10 @@ def find_edges(traj, wind):
 
 #!=====================================================================================
 def find_MADs_KDE(x, y):
-    
+    '''
+    Takes:
+    Returns:
+    '''
     xmin = x.min()
     xmax = x.max()
     ymin = y.min()
@@ -178,7 +259,10 @@ def find_MADs_KDE(x, y):
 
 #!=====================================================================================
 def find_center(ax, X, min_bin_freq = 100):
-    
+    '''
+    Takes:
+    Returns:
+    '''
     bandwidth = estimate_bandwidth(X, quantile=0.2)
 
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq = min_bin_freq)
@@ -203,6 +287,10 @@ def find_center(ax, X, min_bin_freq = 100):
 
 #!=====================================================================================
 def find_MADs_MeanShift(ax, param1, param2, data, min_bin_freq):
+    '''
+    Takes:
+    Returns:
+    '''
     x = data[param1].values
     y = data[param2].values
     X = np.column_stack([x, y])
@@ -217,6 +305,10 @@ def find_MADs_MeanShift(ax, param1, param2, data, min_bin_freq):
 
 #!=====================================================================================
 def plot_MADs((MADx, MADy), (x0, y0), N_MADs, colors, lines):
+    '''
+    Takes:
+    Returns:
+    '''
     for i in range(len(N_MADs)):
         ellipse = Ellipse((x0, y0), N_MADs[i]*MADx*2, N_MADs[i]*MADy*2, edgecolor=colors[i], lw=5, ls =lines[i],
                              fc = 'None', label = '{} MAD'.format(N_MADs[i]))
@@ -224,6 +316,10 @@ def plot_MADs((MADx, MADy), (x0, y0), N_MADs, colors, lines):
 
 #!=====================================================================================
 def assign_dist(dataset_stats, params, center, R):
+    '''
+    Takes:
+    Returns:
+    '''
     (param1, param2) = params
     (x0, y0) = center
     (Rx, Ry) = R
