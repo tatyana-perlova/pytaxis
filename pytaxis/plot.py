@@ -70,7 +70,7 @@ def plot_ellipses(ax, (Rx, Ry), (x0, y0), N_Rs, colors):
         ax.add_patch(ellipse)
         
 #!==============trajectories================
-def plot_traj(traj, imdim, palette = None):
+def plot_traj_all(traj, imdim, pix_size, palette = None, scalebar = 100):
     
     if palette == None:
         palette = seaborn.color_palette("Dark2", len(traj.particle.unique()))
@@ -90,7 +90,9 @@ def plot_traj(traj, imdim, palette = None):
     
     unstacked = traj.set_index(['frame', 'particle']).unstack()
     plot = plt.plot(unstacked.x, unstacked.y, linewidth=2, alpha = 1)
-    
+    plt.gca().set_aspect(1)
+    plt.plot([1600, 1600 + scalebar/pix_size], [1800 , 1800], color = 'black', linewidth = 4)
+    plt.text(1550, 1850, r'{}$\mu m$'.format(scalebar), fontsize = 18)
 #!==============distributions================
 
 def dist_by_state(traj, state, params, palette):

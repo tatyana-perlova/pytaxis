@@ -8,6 +8,9 @@ from scipy import stats, integrate
 import itertools
 import pylab
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.cluster import MeanShift, estimate_bandwidth
+
 #!==============Define functions================
 #!=====================================================================================
 def find_tumbles(traj,  model, params = ['vel_norm', 'acc_norm', 'acc_angle'], 
@@ -172,6 +175,52 @@ def find_MADs_KDE(x, y):
     MADy = np.median(abs(y - y0))
 
     return (x0, y0), (MADx, MADy), (Z, extent)
+
+#!=====================================================================================
+def find_center(ax, X, min_bin_freq = 100):
+    
+    bandwidth = estimate_bandwidth(X, quantile=0.2)
+
+    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq = min_bin_freq)
+    ms.fit(X)
+    labels = ms.labels_
+    cluster_centers = ms.cluster_centers_
+    
+    labels_unique = np.unique(labels)
+    n_clusters_ = len(labels_unique)
+    
+    plt.figure(1)
+
+    colors = itertools.cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
+    for k, col in zip(range(n_clusters_), colors):
+        my_members = labels == k
+        cluster_center = cluster_centers[k]
+        ax.plot(X[my_members, 0], X[my_members, 1], col + '.')
+        ax.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col,
+                 markeredgecolor='k', markersize=3, markeredgewidth = 3)
+    ax.set_title('Estimated number of clusters: %d' % n_clusters_)
+    return cluster_centers, labels
+
+#!=====================================================================================
+def find_MADs_MeanShift(ax, param1, param2, data, min_bin_freq):
+    x = data[param1].values
+    y = data[param2].values
+    X = np.column_stack([x, y])
+    cluster_centers, labels = find_center(ax, X, min_bin_freq)
+    cluster_num = np.where(cluster_centers[:,0] > 10)[0][0]
+    (x0, y0) = cluster_centers[cluster_num]
+    
+    MADx = np.median(abs(x[np.where(labels == cluster_num)] - x0))
+    MADy = np.median(abs(y[np.where(labels == cluster_num)] - y0))
+    return (MADx, MADy), (x0, y0), cluster_centers, labels
+
+
+#!=====================================================================================
+def plot_MADs((MADx, MADy), (x0, y0), N_MADs, colors, lines):
+    for i in range(len(N_MADs)):
+        ellipse = Ellipse((x0, y0), N_MADs[i]*MADx*2, N_MADs[i]*MADy*2, edgecolor=colors[i], lw=5, ls =lines[i],
+                             fc = 'None', label = '{} MAD'.format(N_MADs[i]))
+        ax.add_patch(ellipse)
 
 #!=====================================================================================
 def assign_dist(dataset_stats, params, center, R):
