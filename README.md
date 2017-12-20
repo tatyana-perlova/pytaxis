@@ -1,7 +1,7 @@
 ![Alt text](/examples/logo.png?raw=true "Title")
 
 ## Pytaxis
-Pytaxis is a Python package for analysis of movies of swimming bacteria. [**Read the tutorial**](/examples/Full_walkthrough.ipynb) for details on how to use the package. If you use pytaxis for published research, please cite [**this paper**](https://www.biorxiv.org/content/early/2017/10/30/211474) to credit the authors. 
+Pytaxis is a Python package for analysis of movies of swimming bacteria. [**Read the tutorial**](/examples/Data_analysis_demo.ipynb) for details on how to use the package. If you use pytaxis for published research, please cite [**this paper**](https://www.biorxiv.org/content/early/2017/10/30/211474) to credit the authors. 
 
 ### Library structure
 Py-taxis consists of three modules:
