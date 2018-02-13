@@ -51,7 +51,7 @@ def find_cells(frame, background, mnsize, mxsize):
     for cnt in contours:
         if (cv2.contourArea(cnt) >= mnsize) & (cv2.contourArea(cnt) <= mxsize):
             (x,y),(MA,ma),angle = cv2.fitEllipse(cnt)
-            if (x > 0)*(y > 0)*(x<=2048)*(y <= 2048) > 0:
+            if (x > 0)*(y > 0)*(x<=imdim)*(y <= imdim) > 0:
                 cv2.ellipse(frame, (int((x)),int((y))), (int(MA/2 + 3), int(ma/2 + 3)), round(angle), 0, 360, 255, 2)
                 x_coords.append(x), y_coords.append(y), lengths.append(MA), angles.append(angle)
                         
@@ -111,7 +111,7 @@ def find_cells_video(filename,
     cap = cv2.VideoCapture(filename)
     if write == True:
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(filename[:-4] + '_detected.avi',fourcc, 6, (2048, 2048))
+        out = cv2.VideoWriter(filename[:-4] + '_detected.avi',fourcc, 6, (imdim, imdim))
 
     if maxframe == None:
         maxframe = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1        
