@@ -128,7 +128,7 @@ def find_cells_video(filename,
             out.write(frame)
         
         if i % 100 == 0:
-            print len(x_coords), ' bacteria found in ', i ,'th frame'
+            print('{} bacteria found in {}th frame'.format(len(x_coords),  i))
             
         data['x'] = data['x'] + x_coords
         data['y'] = data['y'] + y_coords

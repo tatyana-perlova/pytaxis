@@ -46,7 +46,7 @@ def find_tumbles(traj,
     traj = calc_stat(traj, ['vel'], [lambda x: np.nanpercentile(x, 95)], ['run_mean'])
     
     while tol > threshold:
-        print 'iteration ', i
+        print('iteration {}'.format(i))
         i += 1
         traj = traj[traj.vel_run_mean != 0]
         traj.loc[:, 'vel_norm'] = traj.loc[:, 'vel']/traj.loc[:, 'vel_run_mean']
@@ -130,7 +130,7 @@ def fit_model(traj,
     lengths = traj[['particle', 'frame']].groupby([u'particle'], as_index = False).count().frame.values
     
     if not model:
-        print 'No model provided, constructing {} model based on the current dataset'.format(model_type)
+        print('No model provided, constructing {} model based on the current dataset'.format(model_type))
         if model_type == 'HMM':
             model = hmm.GaussianHMM(n_components = n_components, covariance_type = covariance_type, n_iter = n_iter).fit(X, lengths)
         if model_type == 'GMM':
@@ -344,15 +344,13 @@ def find_MADs_MeanShift(ax,
 
 
 #!=====================================================================================
-def plot_MADs((MADx, MADy), 
-              (x0, y0), 
-              N_MADs, 
-              colors, 
-              lines):
+def plot_MADs(MADs, coords, N_MADs, colors, lines):
     '''
     Takes:
     Returns:
     '''
+    (MADx, MADy) = MADs
+    (x0, y0) = coords
     for i in range(len(N_MADs)):
         ellipse = Ellipse((x0, y0), N_MADs[i]*MADx*2, N_MADs[i]*MADy*2, edgecolor=colors[i], lw=5, ls =lines[i],
                              fc = 'None', label = '{} MAD'.format(N_MADs[i]))

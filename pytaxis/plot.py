@@ -78,14 +78,17 @@ def plot_KDE(Z,
     
 #!==============Ellipses================
 def plot_ellipses(ax, 
-                  (Rx, Ry), 
-                  (x0, y0), 
+                  RADs, 
+                  coords, 
                   N_Rs, 
                   colors):
     '''
     Takes:
     Returns:
     '''
+    
+    (Rx, Ry) = RADs
+    (x0, y0) = coords
     for i in range(len(N_Rs)):
         ellipse = Ellipse((x0, y0), N_Rs[i]*Rx*2, N_Rs[i]*Ry*2, edgecolor=colors[i], lw=5,
                              fc = 'None', label = '{} R'.format(N_Rs[i]))
