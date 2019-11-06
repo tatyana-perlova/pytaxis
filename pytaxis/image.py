@@ -22,7 +22,7 @@ def get_binary(img):
     return(frame_bin)
 
 #!===================Find objects in the binary image======================
-def find_cells(frame, background, mnsize, mxsize):
+def find_cells(frame, background, mnsize, mxsize,imdim1,imdim2):
     '''
     Finds contours in the phase contrast image and fits them with ellipses, from which coordinates, angles and lengths are extracted.
     Takes:
@@ -46,18 +46,18 @@ def find_cells(frame, background, mnsize, mxsize):
     
     frame_adj = cv2.subtract(background, frame)
     frame_bin = get_binary(frame_adj)
-    _, contours, _ = cv2.findContours(frame_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(frame_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     
     for cnt in contours:
         if (cv2.contourArea(cnt) >= mnsize) & (cv2.contourArea(cnt) <= mxsize):
             (x,y),(MA,ma),angle = cv2.fitEllipse(cnt)
-            if (x > 0)*(y > 0)*(x<=imdim)*(y <= imdim) > 0:
+            if (x > 0)*(y > 0)*(x<=imdim2)*(y <= imdim1) > 0:
                 cv2.ellipse(frame, (int((x)),int((y))), (int(MA/2 + 3), int(ma/2 + 3)), round(angle), 0, 360, 255, 2)
                 x_coords.append(x), y_coords.append(y), lengths.append(MA), angles.append(angle)
                         
     return(x_coords, y_coords, lengths, angles, contours, frame)
     
-def get_background(filename, begin = 0, Nframes = 300, imdim = 2048, alpha = 0.005):
+def get_background(filename, begin = 0, Nframes = 300, imdim1 = 2048, imdim2=2048, alpha = 0.005):
     '''
     Gets background from the video before and after the illumination is changed.
     Takes:
@@ -70,13 +70,13 @@ def get_background(filename, begin = 0, Nframes = 300, imdim = 2048, alpha = 0.0
     background - intensity scaled background frame.
     '''
     cap = cv2.VideoCapture(filename)
-    background = np.float32(np.zeros((imdim, imdim, 3)))
+    background = np.float32(np.zeros((imdim1, imdim2, 3)))
     
     for i in range(begin):
         ret, frame = cap.read()
     
     for i in range(begin, begin + Nframes):
-        ret, frame = cap.read()
+        ret, frame = cap.read() 	
         cv2.accumulateWeighted(frame, background, alpha)
         
     cap.release()
@@ -88,7 +88,8 @@ def find_cells_video(filename,
                      background,
                      minframe = 0,
                      maxframe = None,
-                     imdim = 2048, 
+                     imdim1 = 2048,
+		     imdim2 = 2048, 
                      mnsize = 15, 
                      mxsize = 150,
                      write = False):
@@ -111,7 +112,7 @@ def find_cells_video(filename,
     cap = cv2.VideoCapture(filename)
     if write == True:
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(filename[:-4] + '_detected.avi',fourcc, 6, (imdim, imdim))
+        out = cv2.VideoWriter(filename[:-4] + '_detected.avi',fourcc, 6, (imdim1, imdim2))
 
     if maxframe == None:
         maxframe = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1        
@@ -123,7 +124,7 @@ def find_cells_video(filename,
     for i in range(minframe, maxframe):
         ret, frame = cap.read()
         
-        (x_coords, y_coords, lengths, angles, contours, frame) = find_cells(frame, background, mnsize, mxsize)
+        (x_coords, y_coords, lengths, angles, contours, frame) = find_cells(frame, background, mnsize, mxsize,imdim1,imdim2)
         if write == True:
             out.write(frame)
         
@@ -144,7 +145,7 @@ def find_cells_video(filename,
     return(coords, frame)
 
         
-def test_detection(filename, mnsize, mxsize, begin = 0, Nframes = 300, imdim = 2048, alpha = 0.005, show = False):
+def test_detection(filename, mnsize, mxsize, begin = 0, Nframes = 300, imdim1 = 2048,imdim2=2048, alpha = 0.005, show = False):
     
     '''
     Accumulates background and finds bacteria in one frame, shows background frame and frame with detected bacteria. For testing purposes.
@@ -161,10 +162,10 @@ def test_detection(filename, mnsize, mxsize, begin = 0, Nframes = 300, imdim = 2
     frame - frame with highlighted bacteria for testing purposes.
     
     '''    
-    background = get_background(filename, begin, Nframes, imdim, alpha)
+    background = get_background(filename, begin, Nframes, imdim1,imdim2, alpha)
     cap = cv2.VideoCapture(filename)
     ret, frame = cap.read()
-    (x_coords, _, _, _, _, frame) = find_cells(frame, background, mnsize, mxsize)
+    (x_coords, _, _, _, _, frame) = find_cells(frame, background, mnsize, mxsize,imdim1,imdim2)
     
     if show == True:
         plt.figure(figsize=(20, 10))
